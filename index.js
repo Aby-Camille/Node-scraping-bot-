@@ -1,33 +1,43 @@
 import puppeteer from 'puppeteer';
 
+const selections = ['front', 'javascript', 'java'];
+
+function delay(time) {
+  return new Promise(function(resolve) { 
+      setTimeout(resolve, time);
+  });
+}
+
 (async () => {
   // Launch the browser and open a new blank page
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
   // Navigate the page to a URL
-  await page.goto('https://www.google.com/');
-  console.log('page ok')
+  await page.goto('https://www.welcometothejungle.com/fr/pages/emploi-developpeur-web-rennes-35000');
 
   // Set screen size
   await page.setViewport({width: 1080, height: 1024});
 
   // Locate the full title with a unique string
-  const textSelector = await page.waitForSelector('textarea');
-  console.log('input ok')
-  await page.type('textarea', 'Alternance développement web');
-  console.log('text ok')
-
-  // Press enter to search
-  await page.keyboard.press('Enter');
-    console.log('enter ok')
+  await page.waitForSelector('#axeptio_btn_dismiss');
+  await page.click('#axeptio_btn_dismiss');
+  await delay(1e3);
+  
   await page.screenshot({
     path: 'Image.png'
   })
-  console.log('image ok')
+  console.log('screenshot taken');
 
-  // Print the full title
-  console.log('end');
+  const headingText = await page.evaluate(() => {
+    const elements = document.querySelectorAll('h4');
+    return Array.from(elements, element => element.innerHTML);
+  });
+  console.log(headingText);
+
+  const jobs = headingText.filter(text => selections.some(selection => text.toLowerCase().includes(selection)));
+  console.log(jobs);
+  console.log(jobs.length);
 
   await browser.close();
 })();
